@@ -1,9 +1,7 @@
 #include<iostream>
 #include<cmath>
 #include<itpp/itbase.h>
-#include<NTL/GF2X.h>
 #include<fstream>
-#include "weilei_lib/weilei_lib.h"
 
 
 // write a number into binary form
@@ -55,77 +53,3 @@ itpp::GF2mat circulant_mat(itpp::bvec a3){
 
     return Aa3;
 }
-
-void set_weight(itpp::bvec a4, int begin4, int w4, int l4){
-
-    int cof, k4, d4, rate4;
-    long coff;
-    NTL::GF2X a4_pol, g4;
-    NTL::GF2X l4_pol = NTL::GF2X(l4,1) + 1;
-    itpp::GF2mat Aa4(l4,l4), TAa4(l4,l4), Hx4(l4,2*l4);
-    itpp::bvec vtemp(l4);
-
-    //std::ofstream data;
-    //data.open ("data.txt");
-    
-    if(w4 > 1){
-        for(int i4 = begin4; i4 <= l4-w4+1; i4++){
-            a4(i4) = 1;
-            set_weight(a4, i4+1, w4-1,l4);
-            a4(i4) = 0;
-        }
-    }
-    else{
-
-        for(int j4 = 0; j4 < l4; j4++){
-            cof = a4(j4);
-            coff = cof;
-            a4_pol += NTL::GF2X(j4,coff);
-        }
-        
-        g4 = GCD(a4_pol, l4_pol);
-
-        if(g4 != 1){
-        
-            k4 = 2 * NTL::deg(g4);
-            if(k4 != 0){
-
-                Aa4 = circulant_mat(a4);
-                TAa4 = Aa4.transpose();
-
-                for(int m4 = 0; m4 < l4; m4++){
-                    vtemp = Aa4.get_col(m4);
-                    Hx4.set_col(m4, vtemp);
-                }
-
-                for(int o4 = l4; o4 < 2*l4; o4++){
-                    vtemp = TAa4.get_col(o4-l4);
-                    Hx4.set_col(o4, vtemp);
-                }
-                
-                d4 = common::quantum_dist_v2(Hx4, Hx4, 0);
-
-                if(d4 > 2 & d4 < 999){
-                    //rate4 = k4/l4/2;
-                    //count4 = count4 + 1;
-                    std::cout << "[" << 2*l4 <<", "<< k4 <<", "
-                        << d4 << "]" << "non zero digit of a: ";
-                    for(int p4 = 0; p4 < l4; p4++){
-                        if(a4(p4)!= 0){
-                            std::cout << p4 << ", ";
-                        }
-                    }
-                    std::cout << "\n"; 
-                }
-                
-                
-            }
-        }
-
-        a4_pol = 0;
-    }
-
-
-}
-    
-

@@ -3,11 +3,7 @@
 #include<cmath>
 #include <itpp/itbase.h>
 #include <chrono>
-#include <NTL/GF2X.h>
-#include <NTL/GF2E.h>
-#include <NTL/GF2XFactoring.h>
-#include "func.hpp"
-#include "weilei_lib/weilei_lib.h" 
+#include "func.hpp" 
 
 //To run: make bike
 //        ./bike.out
@@ -23,19 +19,11 @@ int main(){
     int l = 31;
     //
     itpp::bin tempcof2;
-    NTL::GF2 c,z;
     itpp::GF2mat Aa(l,l), Bb(l, l), TAa(l,l), TBb(l,l), Hx(l,2*l), Hz(l,2*l);
     itpp::bvec vtemp(l), a(l), b(l);
-    NTL::GF2X l_pol, a_pol, b_pol, g1, g2, m, c1_pol, c2_pol, x1, x2, ab_pol, c_pol, y;
-    //NTL::vec_GF2 roots;
-    NTL::vec_pair_GF2X_long l_factors, a_factors, b_factors;
-
-    //construct polinomial l
-    l_pol = NTL::GF2X(l,1) + 1;
 
     //construct polinomial a
     //To change: a(x) = ...
-    a_pol += NTL::GF2X(1,1) + NTL::GF2X(3,1) + 1;
     a.zeros();
     a(0) = 1;
     a(1) = 1;
@@ -47,81 +35,12 @@ int main(){
 
     //construct polynomial b
     //To change: b(x) = ...
-    b_pol += NTL::GF2X(1,1) + NTL::GF2X(3,1) + 1;
-    //b_pol =1 ;
     b.zeros();
     b(0) = 1;
     b(4) = 1;
     b(17) = 1;
     //
     Bb = circulant_mat(b);
-
-
-    // //construct matrix Hx
-    //Aa = circulant_mat(a);
-    //Bb = circulant_mat(b)
-    // for(int m = 0; m < l; m++){
-    //     vtemp = Aa.get_col(m);
-    //     Hx.set_col(m, vtemp);
-    // }
-    // for(int o = l; o < 2*l; o++){
-    //     vtemp = Bb.get_col(o-l);
-    //     Hx.set_col(o, vtemp);
-    // }
-    // //find rank of Hx
-    // rank = Hx.row_rank();
-
-
-    //find roots of l
-    //roots = NTL::FindRoots(l_pol);
-
-    //find factors of l, a, and b
-    l_factors = NTL::CanZass(l_pol, verbose);
-    a_factors = NTL::CanZass(a_pol, verbose);
-    b_factors = NTL::CanZass(b_pol, verbose);
-
-    std::cout <<"l:"<< l_pol << "\n";
-    std::cout <<"l_factors"<< l_factors << "\n";
-    std::cout <<"a_pol:"<< a_pol << "\n";
-    std::cout <<"a_factors"<< a_factors << "\n";
-    std::cout <<"a:"<< a << "\n";
-    std::cout <<"Aa:"<< Aa << "\n";
-    std::cout <<"b_pol:"<< b_pol << "\n";
-    std::cout <<"b_factors"<< b_factors << "\n";
-    std::cout <<"b:"<< b << "\n";
-    std::cout <<"Bb:"<< Bb << "\n";
-    
-    //find GCD of a and x^l-1
-    g1 = NTL::GCD(a_pol, l_pol);
-    g2 = NTL::GCD(g1, b_pol);
-
-    //find degree of a
-    g_deg = NTL::deg(g2);
-
-    // d = common::quantum_dist_v2(Hx, Hx, 0);
-    // Ad = common::classical_dist(Aa);
-    
-    m = NTL::MulMod(a_pol, b_pol, l_pol);
-
-    c1_pol += NTL::GF2X(12,1) + NTL::GF2X(8,1)+ NTL::GF2X(4,1);
-    c2_pol += 1;
-    ab_pol += NTL::GF2X(14,1) + NTL::GF2X(13,1) + NTL::GF2X(4,1) +1;
-    c_pol += NTL::GF2X(13,1) + NTL::GF2X(12,1) + NTL::GF2X(8,1) + NTL::GF2X(4,1);
-
-    x1 = NTL::MulMod(b_pol, c1_pol, l_pol);
-    x2 = NTL::MulMod(a_pol, c2_pol, l_pol);
-    y = NTL::MulMod(ab_pol, c_pol, l_pol);
-    //z = NTL::project(ab_pol, c_pol)
-    
-    // std::cout <<"Hx_rank:"<< rank << "\n";
-    //std::cout <<"roots"<< roots << "\n";
-
-    std::cout <<"x:"<< x1 <<", "<< x2 << "\n";
-    std::cout <<"y:"<< y << "\n";
-    //std::cout <<"z:"<< z << "\n";
-    std::cout <<"GCD of a and l:"<< g1 << "\n";
-    std::cout <<"GCD of a, b, and l:"<< g2 << "\n";
-    std::cout <<"g_degree:"<< g_deg << "\n";
 
     //construct Hx
     for(int i = 0; i < l; i++){
@@ -132,8 +51,6 @@ int main(){
         vtemp = Bb.get_col(j-l);
         Hx.set_col(j, vtemp);
     }
-
-    std::cout << "Hx" << Hx << "\n";
 
     //construct Hz
     TAa = Aa.transpose();
@@ -146,8 +63,6 @@ int main(){
         vtemp = TAa.get_col(q-l);
         Hz.set_col(q, vtemp);
     }
-
-    std::cout << "Hz" << Hz << "\n";
 
     std::cout << "for xingrui:" << "\n";
     std::cout << "Hx" << "\n";
@@ -173,27 +88,6 @@ int main(){
         }
         std::cout << "\n"; 
     }
-
-    //std::cout << "call qd" << "\n";
-    //Hx = common::make_it_full_rank(Hx);
-    //std::cout << "Hx" << Hx << "\n";
-    //Hz = common::make_it_full_rank(Hz);
-    d = common::quantum_dist_v2(Hz, Hx, 0);
-    //itpp::GF2mat C = common::getC(Hx, Hz, 1);
-    //itpp::bvec v2temp("1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 0 0 0 0");
-    //itpp::GF2mat C(1,26);
-    //itpp::GF2mat C(1, 2*l);
-    //C.set_row(0,v2temp);
-    //std::cout << "C = " << C << "\n";
-    //std::cout << "Hx*C = "<< Hx*C.transpose() << "\n";
-    //itpp::GF2mat Q=Hz.concatenate_vertical(C);
-    //std::cout << "rankHz: " << Hz.row_rank() << "," << Hz.rows() << "\n";
-    //std::cout << "rankQ: " << Q.row_rank() <<"," <<Q.rows() << "\n";
-    //std::cout << "Hx*Hz = " << Hx*Hz.transpose() << "\n";
-
-    std::cout << "bicycle distance:" << d << "\n";
-    // std::cout << "cyclic distance:" << Ad << "\n";
-
 
     std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> time_span = (end - start)/1000;
